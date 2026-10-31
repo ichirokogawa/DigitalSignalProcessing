@@ -1,0 +1,24 @@
+﻿name: Build VC++
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: x64
+
+      - name: Build Release x64
+        run: >-
+          msbuild DigitalSignalProcessing.slnx
+          -restore -p:RestorePackagesConfig=true
+          -p:Configuration=Release -p:Platform=x64
