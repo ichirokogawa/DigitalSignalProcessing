@@ -19,6 +19,8 @@
 
 constexpr int LOW_PASS_CUTOFF = 10;
 
+constexpr int HIGH_PASS_CUTOFF = 10;
+
 // x = i / N は標本時刻（秒）。区間 [0, 1) の1秒間を N 点でサンプリングする
 double GetX(int i)
 {
@@ -133,6 +135,25 @@ void ApplyLowPassFilter(fftw_complex* spectrum)
 		}
 	}
 }
+
+// 課題4.5：理想ハイパスフィルタ
+void ApplyHighPassFilter(fftw_complex* spectrum)
+{
+	for (int k = 0; k < N; k++)
+	{
+		// 正と負の周波数成分に同じカットオフ周波数を適用する
+		int frequency = std::min(k, N - k);
+
+		if (frequency <= HIGH_PASS_CUTOFF)
+		{
+			spectrum[k][0] = 0.0;
+			spectrum[k][1] = 0.0;
+		}
+	}
+}
+
+
+
 
 // 課題4：フィルタ適用前後の波形を出力する
 void ExportFiltered(
@@ -278,6 +299,17 @@ int main()
 
 		fftw_execute(backwardPlan);
 		ExportFiltered("task4_filter.csv", in, inverse);
+
+		// ================================
+		// 課題4.5：ハイパスフィルタの適用
+		// ================================
+
+		GenerateInput(in, Mixed);
+		fftw_execute(forwardPlan);
+		ApplyHighPassFilter(out);
+
+		fftw_execute(backwardPlan);
+		ExportFiltered("task4.5_filter.csv", in, inverse);
 
 
 		// ================================
